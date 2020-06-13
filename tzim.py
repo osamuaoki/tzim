@@ -49,116 +49,134 @@ import sys
 import glob
 import re
 import datetime
+
+
 def main():
-	tomboynotes = input("Path to tomboy notes directory (default ~/.tomboy): ")
-	if tomboynotes == "":
-		tomboynotes = os.path.expanduser('~')
-		tomboynotes += '/.tomboy/'
-	if not tomboynotes.rstrip == '/':
-		tomboynotes += '/*.note'
-	else:
-		tomboynotes += '*.note'
-	files = glob.glob(tomboynotes)				# Read tomboy notes file names
-	if len(files) == 0 :
-		print("No note files.")				# Exit if no note files in directory
-		sys.exit()
-	zimnotes = input("Path to zim notes directory (default ./ (current dir)): ")
-	curdir = os.getcwd()
-	if zimnotes:
-		zimnotes = os.path.expanduser(zimnotes)
-		if not os.path.exists(zimnotes):
-			os.mkdir(zimnotes)
-		os.chdir(zimnotes)
-	for fil in files:
-		infile = open(fil, 'r')
-		longline = infile.read()
-		infile.close()
+    tomboynotes = input("Path to tomboy notes directory (default ~/.tomboy): ")
+    if tomboynotes == "":
+        tomboynotes = os.path.expanduser("~")
+        tomboynotes += "/.tomboy/"
+    if not tomboynotes.rstrip == "/":
+        tomboynotes += "/*.note"
+    else:
+        tomboynotes += "*.note"
+    files = glob.glob(tomboynotes)  # Read tomboy notes file names
+    if len(files) == 0:
+        print("No note files.")  # Exit if no note files in directory
+        sys.exit()
+    zimnotes = input("Path to zim notes directory (default ./ (current dir)): ")
+    curdir = os.getcwd()
+    if zimnotes:
+        zimnotes = os.path.expanduser(zimnotes)
+        if not os.path.exists(zimnotes):
+            os.mkdir(zimnotes)
+        os.chdir(zimnotes)
+    for fil in files:
+        infile = open(fil, "r")
+        longline = infile.read()
+        infile.close()
 
-# --- Match note title --------------------------------------------------------
-		match = re.search(r'.*<title>(.*)</title>', longline, re.S)
-		if match:
-			title = format(match.group(1))
-			print("***** Converting:", title, "*****")
-		else:
-			print("Title: note title could not be found")
+        # --- Match note title --------------------------------------------------------
+        match = re.search(r".*<title>(.*)</title>", longline, re.S)
+        if match:
+            title = format(match.group(1))
+            print("***** Converting:", title, "*****")
+        else:
+            print("Title: note title could not be found")
 
-# --- Match tomboy note format versions ---------------------------------------
-		match = re.search(r'.*<note version="(\d+\.\d+)"', longline, re.S)
-		if match:
-			if match.group(1) not in [ "0.2", "0.3" ] :
-				print("Version: only tested with Tomboy note version 0.2 and 0.3")
-		else:
-			print("Version: Tomboy note version could not be found")
+        # --- Match tomboy note format versions ---------------------------------------
+        match = re.search(r'.*<note version="(\d+\.\d+)"', longline, re.S)
+        if match:
+            if match.group(1) not in ["0.2", "0.3"]:
+                print("Version: only tested with Tomboy note version 0.2 and 0.3")
+        else:
+            print("Version: Tomboy note version could not be found")
 
-# --- Match note text ---------------------------------------------------------
-		match = re.search(r'.*<note-content.*?>.*?\n(.*)</note-content>', longline, re.S)
-		                                                       #^^^^ to avoid title repeat itself
-		if match:
-			text = format(match.group(1))
-		else:
-			print("Text: note text could not be found")
-			text = "*** No text found in tomboy note ***"
+        # --- Match note text ---------------------------------------------------------
+        match = re.search(
+            r".*<note-content.*?>.*?\n(.*)</note-content>", longline, re.S
+        )
+        # ^^^^ to avoid title repeat itself
+        if match:
+            text = format(match.group(1))
+        else:
+            print("Text: note text could not be found")
+            text = "*** No text found in tomboy note ***"
 
-# --- Match last-change text --------------------------------------------------
-		match = re.search(r'.*<last-change-date>(\d\d\d\d-\d\d-\d\d).*</last-change-date>', longline, re.S)
-		if match:
-			last_change_date = match.group(1)
-		else:
-			last_change_date = "Not found"
-			print("last-change-date: could not be found")
+        # --- Match last-change text --------------------------------------------------
+        match = re.search(
+            r".*<last-change-date>(\d\d\d\d-\d\d-\d\d).*</last-change-date>",
+            longline,
+            re.S,
+        )
+        if match:
+            last_change_date = match.group(1)
+        else:
+            last_change_date = "Not found"
+            print("last-change-date: could not be found")
 
-# --- Match create-change text ------------------------------------------------
-		match = re.search(r'.*<create-date>(\d\d\d\d-\d\d-\d\d).*</create-date>', longline, re.S)
-		if match:
-			create_date = match.group(1)
-		else:
-			create_date = "Not found"
-			print("create-date: could not be found")
+        # --- Match create-change text ------------------------------------------------
+        match = re.search(
+            r".*<create-date>(\d\d\d\d-\d\d-\d\d).*</create-date>", longline, re.S
+        )
+        if match:
+            create_date = match.group(1)
+        else:
+            create_date = "Not found"
+            print("create-date: could not be found")
 
-# --- Match folder (tomboy version > 0.3) -------------------------------------
-# 2018-07-28: vrubiolo: non-greedy modifier for '+' is here to support nested tags
-# (too much is matched otherwise and the potential mkdir() below for folder creation fails)
-		match = re.search(r'.*<tag>system:notebook:(.+?)</tag>', longline, re.S)
-		if match:
-			folder = match.group(1)
-		else:
-			folder = ""
+        # --- Match folder (tomboy version > 0.3) -------------------------------------
+        # 2018-07-28: vrubiolo: non-greedy modifier for '+' is here to support nested tags
+        # (too much is matched otherwise and the potential mkdir() below for folder creation fails)
+        match = re.search(r".*<tag>system:notebook:(.+?)</tag>", longline, re.S)
+        if match:
+            folder = match.group(1)
+        else:
+            folder = ""
 
-# --- Put together zim note ---------------------------------------------------
-		outname = title
-		outname = re.sub('[/&<>:; ]', '_', outname)   # removing "dangerous" chars
-		outname += '.txt'                           # zim file name for note
-		if folder != "":
-			if not os.path.exists(folder):
-				os.mkdir(folder)
-			outname = folder + '/' + outname
-		outfile = open(outname, 'w')
-		line = '====== ' + title + ' ======' + '\n'
-		line += text + '\n'
-		line += '\n' + 'Last changed (in Tomboy): ' + last_change_date + '\n'
-		line += 'Note created (in Tomboy): ' + create_date + '\n'
-		outfile.write(line)
-		outfile.close()
-	print('\n' + "Conversion OK!")
-	os.chdir(curdir)
-#------------------------------------------------------------------------------
+        # --- Put together zim note ---------------------------------------------------
+        outname = title
+        outname = re.sub("[/&<>:; ]", "_", outname)  # removing "dangerous" chars
+        outname += ".txt"  # zim file name for note
+        if folder != "":
+            if not os.path.exists(folder):
+                os.mkdir(folder)
+            outname = folder + "/" + outname
+        outfile = open(outname, "w")
+        line = "====== " + title + " ======" + "\n"
+        line += text + "\n"
+        line += "\n" + "Last changed (in Tomboy): " + last_change_date + "\n"
+        line += "Note created (in Tomboy): " + create_date + "\n"
+        outfile.write(line)
+        outfile.close()
+    print("\n" + "Conversion OK!")
+    os.chdir(curdir)
 
-def format(line): 									#various format substitutions of lines
-	line = re.sub('</?bold>', '**', line)
-	line = re.sub('</?italic>', '//', line)
-	line = re.sub('</?strikethrough>', '~~', line)
-	line = re.sub('</?highlight>', '__', line)
-	line = re.sub('</?size:(small|large|huge)>', '', line)# Can't handle tomboy sizes
-	line = re.sub('</?monospace>', "''", line)
-	line = re.sub('<link:(internal|broken)>', '[[', line)
-	line = re.sub('</link:(internal|broken)>', ']]', line)
-	line = re.sub('<link:(url)>', '', line)
-	line = re.sub('</link:(url)>', '', line)
-	line = re.sub('<list-item dir="ltr">', '* ', line)# List handling in tomboy to complexfor this
-	line = re.sub('(</?list>|</list-item>)', '', line)# this simple converter; generating a one-level
-	line = re.sub('&gt;', '>', line)					# list only
-	line = re.sub('&lt;', '<', line)
-	line = re.sub('&amp;', '&', line)
-	return(line)
+
+# ------------------------------------------------------------------------------
+
+
+def format(line):  # various format substitutions of lines
+    line = re.sub("</?bold>", "**", line)
+    line = re.sub("</?italic>", "//", line)
+    line = re.sub("</?strikethrough>", "~~", line)
+    line = re.sub("</?highlight>", "__", line)
+    line = re.sub("</?size:(small|large|huge)>", "", line)  # Can't handle tomboy sizes
+    line = re.sub("</?monospace>", "''", line)
+    line = re.sub("<link:(internal|broken)>", "[[", line)
+    line = re.sub("</link:(internal|broken)>", "]]", line)
+    line = re.sub("<link:(url)>", "", line)
+    line = re.sub("</link:(url)>", "", line)
+    line = re.sub(
+        '<list-item dir="ltr">', "* ", line
+    )  # List handling in tomboy to complexfor this
+    line = re.sub(
+        "(</?list>|</list-item>)", "", line
+    )  # this simple converter; generating a one-level
+    line = re.sub("&gt;", ">", line)  # list only
+    line = re.sub("&lt;", "<", line)
+    line = re.sub("&amp;", "&", line)
+    return line
+
 
 main()

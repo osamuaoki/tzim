@@ -1,15 +1,15 @@
 #!/usr/bin/python3
 #################################################################################################
 #                                                                                               #
-# tzim.py - Simple conversion module to convert a Tomboy notes database to zim format.          #
+# tzim.py - Simple conversion module to convert a Tomboy/Gnote notes to zim notes.              #
+#                                                                                               #
 #           _Usage_:                                                                            #
-#           If not alraeady executable,                                                         #
+#           If not already executable,                                                          #
 #           $ chmod a+x tzim.py                                                                 #
 #           Run                                                                                 #
 #           $ <dir-path to tzim.py>/tzim.py                                                     #
 #           follow instructions. When conversed, open zim and add repository (i.e. target dir)  #
 #                                                                                               #
-#           Please send notes that failed to convert to bengt at blafs com.                     #
 #                                                                                               #
 #           GPL statement:                                                                      #
 #           This program is free software; you can redistribute it and/or modify                #
@@ -26,6 +26,14 @@
 #           along with this program.  If not, see <http://www.gnu.org/licenses/>.               #
 #                                                                                               #
 #           Copyright 2007,2008 Bengt J. Olsson                                                 #
+#           Copyright 2020      Osamu Aoki                                                      #
+#                                                                                               #
+# Rev:      1.2.1-oa01                                                                          #
+# Date:     2020-06-13  (OA)                                                                    #
+# Changes:  Updated to python3 and adjust default behavior to modern path choices               #
+#   (original from https://github.com/jaap-karssenberg/zim-wiki/wiki/Tomboy-import-script)      #
+#   (original upstream URL http://blafs.com/diverse.html was unreachable)                       #
+#                                                                                               #
 # Rev:      1.2.1                                                                               #
 # Date:     2008-03-25                                                                          #
 # Changes:  Corrected typo in dialog. Translates tomboy's monospace to zim verbatim             #

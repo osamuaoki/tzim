@@ -48,29 +48,54 @@ import os.path
 import sys
 import glob
 import re
-import datetime
 
 
 def main():
-    tomboynotes = input("Path to tomboy notes directory (default ~/.tomboy): ")
+    home = os.path.expanduser("~")
+    tomboynotes = input("Path to gnote/tomboy notes directory (blank for default path): ")
+    tomboynotes = tomboynotes.rstrip()
     if tomboynotes == "":
-        tomboynotes = os.path.expanduser("~")
-        tomboynotes += "/.tomboy/"
-    if not tomboynotes.rstrip == "/":
-        tomboynotes += "/*.note"
-    else:
-        tomboynotes += "*.note"
-    files = glob.glob(tomboynotes)  # Read tomboy notes file names
+        if os.path.exists(home + "/.local/share/gnote"):
+            # modern choice for gnote
+            tomboynotes = home + "/.local/share/gnote"
+        elif os.path.exists(home + "/.local/share/tomboy"):
+            # modern choice for tomboy
+            tomboynotes = home + "/.local/share/tomboy"
+        elif os.path.exists(home + "/.tomboy"):
+            # historic for tomboy
+            tomboynotes = home + "/.tomboy"
+        else:
+            # current
+            tomboynotes = "."
+    tomboynotes = os.path.realpath(os.path.expanduser(tomboynotes))
+    if not tomboynotes[-1] == "/":
+        tomboynotes += "/"
+    print("***** Reading gnote/tomboy notes from: ", tomboynotes, " *****")
+    files = glob.glob(tomboynotes + "*.note")  # Read tomboy notes file names
     if len(files) == 0:
         print("No note files.")  # Exit if no note files in directory
         sys.exit()
-    zimnotes = input("Path to zim notes directory (default ./ (current dir)): ")
+    zimnotes = input("Path to zim notes directory (blank for current directory): ")
+    zimnotes = zimnotes.rstrip()
+    if zimnotes == "":
+        # current
+        zimnotes = "."
+    zimnotes = os.path.realpath(os.path.expanduser(zimnotes))
+    if not zimnotes[-1] == "/":
+        zimnotes += "/"
+    if zimnotes == tomboynotes:
+        # avoid overlapping directory
+        zimnotes += "zim/"
+    print("***** Writing zim notes to: ", zimnotes, " *****")
+    if not os.path.exists(zimnotes):
+        os.mkdirs(zimnotes)
+    elif os.listdir(zimnotes):
+        print(" ---- some files exist in ", zimnotes, " ----")
+    answer = input("Continue [Yes/no]? ").lower()
+    if answer != "" and answer[0] != "y":
+        sys.exit()
     curdir = os.getcwd()
-    if zimnotes:
-        zimnotes = os.path.expanduser(zimnotes)
-        if not os.path.exists(zimnotes):
-            os.mkdir(zimnotes)
-        os.chdir(zimnotes)
+    os.chdir(zimnotes)
     for fil in files:
         infile = open(fil, "r")
         longline = infile.read()
@@ -145,8 +170,8 @@ def main():
         outfile = open(outname, "w")
         line = "====== " + title + " ======" + "\n"
         line += text + "\n"
-        line += "\n" + "Last changed (in Tomboy): " + last_change_date + "\n"
-        line += "Note created (in Tomboy): " + create_date + "\n"
+        line += "\n" + "Last changed (in Tomboy/Gnote): " + last_change_date + "\n"
+        line += "Note created (in Tomboy/Gnote): " + create_date + "\n"
         outfile.write(line)
         outfile.close()
     print("\n" + "Conversion OK!")
